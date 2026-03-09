@@ -60,13 +60,12 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
 
 2. **Create a virtual environment**:
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv venv
    ```
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   uv pip install -r requirements.txt
    ```
 
 4. **Environment Variables**:
