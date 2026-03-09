@@ -94,3 +94,6 @@ If you are running on a machine without a dedicated GPU:
 ## 🤝 Feedback
 
 This project is a work in progress. If you encounter any "unclear" transcriptions or OCR misses, use the **Continuous Learning** panel in the app to mark the problem as incorrect and provide feedback. The agent will learn from your corrections!
+
+## Deployment 
+### [click here](https://jee-math-mentor.streamlit.app/)
