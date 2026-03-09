@@ -1,0 +1,14 @@
+streamlit
+openai
+python-dotenv
+chromadb
+langchain
+langchain-community
+langchain-text-splitters
+fastembed
+pillow
+easyocr
+faster-whisper
+torch
+torchvision
+torchaudio
