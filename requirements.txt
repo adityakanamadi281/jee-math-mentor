@@ -12,3 +12,4 @@ faster-whisper
 torch
 torchvision
 torchaudio
+langchain-chroma>=0.1.2
