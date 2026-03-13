@@ -148,12 +148,6 @@ class MathMentorSystem:
         4. Reference context: {context}. Reference past cases: {memory_context}.
         
         STRUCTURE:
-        ### Objective
-        (Problem goal)
-        
-        ### Key Concepts
-        (Formulas/principles used in plain text)
-        
         ### Step-by-Step Solution
         (Detailed numbered steps)
         
@@ -171,12 +165,6 @@ class MathMentorSystem:
         4. Reference context: {context}. Reference past cases: {memory_context}.
         
         STRUCTURE:
-        ### Objective
-        (Problem goal)
-        
-        ### Key Concepts
-        (Formulas/principles used in plain text)
-        
         ### Step-by-Step Solution
         (Detailed numbered steps)
         
@@ -206,44 +194,24 @@ class MathMentorSystem:
             }
 
     def explainer_agent(self, solution):
-        system = """You are a JEE Physics & Math Mentor. Your task is to transform technical solutions into conceptual masterclasses.
+        system = """You are a JEE Math Mentor. Your task is to provide a concise conceptual explanation of the solution in the 'Tutor's Corner'.
         
-        STRICT FORMATTING RULES:
-        1. DO NOT use LaTeX.
-        2. Use clean, plain text and structured formatting.
-        
-        STRUCTURE:
-        ---
-        ###  The Core Logic
-        (Explain the 'why' behind the chosen approach in plain text)
-        
-        ###  Avoid These Pitfalls
-        (Mention common mistakes students make in this specific topic)
-        
-        ###  Pro-Tip
-        (Provide a shortcut or a mental model for this type of problem)
-        ---"""
+        STRICT RULES:
+        1. Provide EXACTLY 5 lines of text for the explanation.
+        2. Focus ONLY on mathematical concepts and solutions.
+        3. DO NOT use LaTeX.
+        4. No headers, just 5 lines of high-impact insight."""
         return self._call(system, solution)
 
 
     def explainer_agent_stream(self, solution):
-        system = """You are a JEE Physics & Math Mentor. Your task is to transform technical solutions into conceptual masterclasses.
+        system = """You are a JEE Math Mentor. Your task is to provide a concise conceptual explanation of the solution in the 'Tutor's Corner'.
         
-        STRICT FORMATTING RULES:
-        1. DO NOT use LaTeX.
-        2. Use clean, plain text and structured formatting.
-        
-        STRUCTURE:
-        ---
-        ###  The Core Logic
-        (Explain the 'why' behind the chosen approach in plain text)
-        
-        ###  Avoid These Pitfalls
-        (Mention common mistakes students make in this specific topic)
-        
-        ###  Pro-Tip
-        (Provide a shortcut or a mental model for this type of problem)
-        ---"""
+        STRICT RULES:
+        1. Provide EXACTLY 5 lines of text for the explanation.
+        2. Focus ONLY on mathematical concepts and solutions.
+        3. DO NOT use LaTeX.
+        4. No headers, just 5 lines of high-impact insight."""
         return self._stream_call(system, solution)
 
     def refine_transcript(self, transcript):
