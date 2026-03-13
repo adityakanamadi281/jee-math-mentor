@@ -103,6 +103,4 @@ This project is a work in progress. If you encounter any "unclear" transcription
 =======
 The system learns from you! If you encounter any "unclear" transcriptions or logical errors, use the **Continuous Learning** panel in the app to mark the problem as incorrect and provide feedback. The agent will learn from your corrections!
 
-## 🚀 Deployment 
-### [Click Here to View Live](https://jee-math-mentor.streamlit.app/)
->>>>>>> 43e2aa8 (JEE Math Mentor-Mulitmodal)
+
