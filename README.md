@@ -1,6 +1,6 @@
 # 🎓 JEE Math Mentor: AI-Powered Multi-Agent Math Solver
 
-A premium, multimodal math tutoring system designed to solve complex JEE-level mathematical problems using a multi-agent orchestration pattern. This system supports **Text**, **Image (OCR)**, and **Voice (ASR)** inputs, providing step-by-step solutions with high-fidelity LaTeX formatting.
+A premium, multimodal math tutoring system designed to solve complex JEE-level mathematical problems using a multi-agent orchestration pattern. This system supports **Text**, **Image (OCR)**, and **Voice (ASR)** inputs, providing step-by-step solutions with detailed conceptual guidance.
 
 ---
 
@@ -8,18 +8,20 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
 
 - **Multimodal Input Support**:
   - **Text**: Direct input of mathematical expressions.
-  - **Image (OCR)**: Extracts math from photos/handwriting using optimized `EasyOCR`.
-  - **Audio (ASR)**: Voice-to-math transcription using `faster-whisper` (Tiny model).
+  - **Image (OCR)**: Extracts math from photos/handwriting using **Gemini Vision**.
+  - **Audio (ASR)**: Voice-to-math transcription using `faster-whisper` (Tiny model) with automated math-refinement.
 - **Multi-Agent Orchestration**:
-  - **Parser Agent**: Extracts mathematical entities and constraints.
+  - **Parser Agent**: Extracts mathematical entities and classifies the topic.
   - **Router & RAG**: Fetches relevant formulas from the integrated knowledge base.
-  - **Solver Agent**: Generates detailed, step-by-step solutions.
+  - **Solver Agent**: Generates detailed, step-by-step solutions using **Gemini 3.1 Flash**.
   - **Verifier Agent**: Performs logical and formatting checks on the solution.
   - **Explainer Agent**: Provides conceptual "Pro-Tips" and warns against common pitfalls.
+- **Resilient & Robust**:
+  - **Exponential Backoff**: Integrated retry logic to handle API rate limits gracefully.
+  - **Global Error Handling**: Custom boundaries to manage quota issues and provide feedback.
 - **CPU-Optimized Performance**:
-  - Leverages 8-bit quantization for models.
-  - Smart image resizing to speed up OCR on standard hardware.
-  - Efficient thread management for PyTorch on CPU.
+  - Smart thread management for PyTorch on CPU.
+  - Efficient image prep and quantized `int8` audio processing for speed.
 - **Continuous Learning**: Users can provide feedback (Correct/Incorrect) which the system stores to improve future reasoning via local memory.
 
 ---
@@ -27,11 +29,11 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
 ## 🛠️ Tech Stack
 
 - **Frontend**: Streamlit (Premium UI)
-- **OCR**: EasyOCR
+- **OCR**: Gemini 3.1 Vision
 - **ASR**: Faster-Whisper
-- **LLM Orchestration**: OpenRouter (GPT/Flash models)
+- **LLM**: Google Gemini API (3.1 Flash / 3.1 Flash Lite)
 - **Vector DB**: ChromaDB with FastEmbed
-- **Core Ops**: PyTorch & LangChain
+- **Core Ops**: PyTorch, LangChain, and Tenacity
 
 ---
 
@@ -41,7 +43,7 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
 ├── agents.py           # Core agent logic and system prompts
 ├── app.py              # Streamlit UI and workflow management
 ├── utils/
-│   ├── parser.py       # OCR and ASR processing (CPU Optimized)
+│   ├── parser.py       # ASR processing (CPU Optimized)
 │   ├── rag.py          # Vector database and formula retrieval
 │   └── memory.py       # Local feedback and learning system
 ├── knowledge_base/     # Markdown files with JEE Math formulas
@@ -69,9 +71,9 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
    ```
 
 4. **Environment Variables**:
-   Create a `.env` file or set up Streamlit secrets:
+   Create a `.env` file in the root directory:
    ```text
-   OPENROUTER_API_KEY=your_key_here
+   GEMINI_API_KEY=your_google_ai_studio_key
    ```
 
 5. **Run the Application**:
@@ -85,15 +87,22 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
 
 If you are running on a machine without a dedicated GPU:
 - The system automatically suppresses unnecessary GPU memory warnings.
-- Images are scaled to 1200px width before OCR processing to maintain speed.
 - Torch is configured to use optimal CPU threading (`torch.set_num_threads`).
 - Whisper uses the `int8` compute type for highly efficient audio processing.
+- Multi-agent bursts are managed with exponential retries to stay within free-tier quotas.
 
 ---
 
 ## 🤝 Feedback
 
+<<<<<<< HEAD
 This project is a work in progress. If you encounter any "unclear" transcriptions or OCR misses, use the **Continuous Learning** panel in the app to mark the problem as incorrect and provide feedback. The agent will learn from your corrections!
 
 ## Deployment 
 ### [click here](https://jee-math-mentor.streamlit.app/)
+=======
+The system learns from you! If you encounter any "unclear" transcriptions or logical errors, use the **Continuous Learning** panel in the app to mark the problem as incorrect and provide feedback. The agent will learn from your corrections!
+
+## 🚀 Deployment 
+### [Click Here to View Live](https://jee-math-mentor.streamlit.app/)
+>>>>>>> 43e2aa8 (JEE Math Mentor-Mulitmodal)

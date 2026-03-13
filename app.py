@@ -21,6 +21,18 @@ st.markdown("""
 st.title("🎓 JEE Math Mentor")
 st.caption("AI-Powered Multi-Agent System for Math Problem Solving")
 
+def handle_api_error(e):
+    import tenacity
+    error_msg = str(e)
+    if isinstance(e, tenacity.RetryError):
+        error_msg = str(e.last_attempt.exception())
+    
+    st.error(f"🚨 **System Error:** {error_msg}")
+    if "429" in error_msg or "quota" in error_msg.lower():
+        st.warning("💳 **Quota Exceeded:** You've hit the Gemini API rate limit. This often happens on free-tier accounts. Please wait a minute and try again.")
+    st.info("💡 **Tip:** Try waiting a few seconds between requests or check your [API Quota](https://aistudio.google.com/app/plan_and_billing).")
+    st.stop()
+
 # --- 1. Input Section ---
 with st.sidebar:
     st.header("⚙️ Configuration")
@@ -35,11 +47,17 @@ if mode == "Text":
 elif mode == "Image (OCR)":
     uploaded_file = st.file_uploader("Upload Image", type=['png', 'jpg', 'jpeg'])
     if uploaded_file:
-        with st.status("🔍 Processing Math OCR...") as status:
-            extracted = ocr_process(uploaded_file)
-            status.update(label="OCR Complete. Please verify below.", state="complete")
-        raw_text = st.text_area("Verify & Correct OCR Output:", value=extracted, height=150)
-        st.info("💡 You can edit the text above if the OCR missed any symbols.")
+        import PIL.Image
+        img = PIL.Image.open(uploaded_file)
+        with st.status("🔍 Gemini Vision analyzing math...") as status:
+            try:
+                v_parsed = system.vision_parser_agent(img)
+                extracted = v_parsed.get("problem_text", "")
+                status.update(label="Analysis Complete. Please verify below.", state="complete")
+            except Exception as e:
+                handle_api_error(e)
+        raw_text = st.text_area("Verify & Correct Output:", value=extracted, height=150)
+        st.info("💡 Gemini Vision has extracted the math problem. You can refine it above.")
 elif mode == "Audio (ASR)":
     audio_tab1, audio_tab2 = st.tabs(["🎤 Record", "📁 Upload"])
     audio_file = None
@@ -54,11 +72,14 @@ elif mode == "Audio (ASR)":
     
     if audio_file:
         with st.status("🎙️ Transcribing and Math-Refining...") as status:
-            transcript = speech_to_text(audio_file)
-            status.update(label="Transcribed. Refining math phrases...", state="running")
-            # Refine verbal math to symbolic math
-            refined = system.refine_transcript(transcript)
-            status.update(label="Transcription Finished", state="complete")
+            try:
+                transcript = speech_to_text(audio_file)
+                status.update(label="Transcribed. Refining math phrases...", state="running")
+                # Refine verbal math to symbolic math
+                refined = system.refine_transcript(transcript)
+                status.update(label="Transcription Finished", state="complete")
+            except Exception as e:
+                handle_api_error(e)
         
         if "[UNCLEAR]" in refined:
             st.warning("⚠️ The transcription seems unclear. Please verify and correct the text below.")
@@ -79,48 +100,52 @@ if st.button("🚀 Solve Problem") and raw_text:
     col1, col2 = st.columns([3, 2])
 
     # RUN AGENTS IN SEQUENCE - Optimized and Streamed
-    with st.status("🧠 Agents collaborating...") as status:
-        # 1. Parser
-        parsed = system.parser_agent(raw_text)
-        st.session_state.parsed = parsed
-        
-        # HITL Trigger: Ambiguity
-        if parsed.get("needs_clarification"):
-            st.warning("⚠️ Parser detected ambiguity. Please clarify the problem.")
-            st.stop()
+    try:
+        with st.status("🧠 Agents collaborating...") as status:
+            # 1. Parser
+            parsed = system.parser_agent(raw_text)
+            st.session_state.parsed = parsed
+            
+            # HITL Trigger: Ambiguity
+            if parsed.get("needs_clarification"):
+                st.warning("⚠️ Parser detected ambiguity. Please clarify the problem.")
+                st.stop()
 
-        # 2. Router & RAG (Parallel-like feel)
-        topic = system.router_agent(parsed)
-        problem_text = parsed.get('problem_text', raw_text)
-        context = rag.retrieve(problem_text)
-        
-        st.write(f"**Router:** `{topic}` | **Context:** Found formulas.")
-        
-        # 3. Solver (Streamed directly to UI)
-        status.update(label="✍️ Expert solving...", state="running")
-        with col1:
-            with st.container(border=True):
-                st.header("📝 Expert Solution")
-                full_solution = st.write_stream(system.solver_agent_stream(problem_text, context, similar_past_cases))
-                st.session_state.full_solution = full_solution
-        
-        # 4. Verifier
-        status.update(label="🔎 Verifying logic...", state="running")
-        verification = system.verifier_agent(full_solution)
-        with col1:
-            if not verification.get('is_confident', False):
-                st.error(f"⚠️ **Verifier:** {verification.get('final_verdict', 'Needs review.')}")
-            else:
-                st.success(f"✅ **Verifier:** Verified logic.")
+            # 2. Router & RAG (Parallel-like feel)
+            # Optimization: Parser already detects topic
+            topic = parsed.get("topic", "Math")
+            problem_text = parsed.get('problem_text', raw_text)
+            context = rag.retrieve(problem_text)
+            
+            st.write(f"**Topic Detected:** `{topic}` | **Context:** Found formulas.")
+            
+            # 3. Solver (Streamed directly to UI)
+            status.update(label="✍️ Expert solving...", state="running")
+            with col1:
+                with st.container(border=True):
+                    st.header("📝 Expert Solution")
+                    full_solution = st.write_stream(system.solver_agent_stream(problem_text, context, similar_past_cases))
+                    st.session_state.full_solution = full_solution
+            
+            # 4. Verifier
+            status.update(label="🔎 Verifying logic...", state="running")
+            verification = system.verifier_agent(full_solution)
+            with col1:
+                if not verification.get('is_confident', False):
+                    st.error(f"⚠️ **Verifier:** {verification.get('final_verdict', 'Needs review.')}")
+                else:
+                    st.success(f"✅ **Verifier:** Verified logic.")
 
-        # 5. Explainer
-        status.update(label="💡 Finalizing tutor notes...", state="running")
-        with col2:
-            with st.container(border=True):
-                st.header("💡 Tutor's Corner")
-                st.write_stream(system.explainer_agent_stream(full_solution))
-        
-        status.update(label="✅ All agents complete", state="complete")
+            # 5. Explainer
+            status.update(label="💡 Finalizing tutor notes...", state="running")
+            with col2:
+                with st.container(border=True):
+                    st.header("💡 Tutor's Corner")
+                    st.write_stream(system.explainer_agent_stream(full_solution))
+            
+            status.update(label="✅ All agents complete", state="complete")
+    except Exception as e:
+        handle_api_error(e)
 
 # --- 3. Feedback Loop ---
 # Check if we have a solution that matches the Current text
