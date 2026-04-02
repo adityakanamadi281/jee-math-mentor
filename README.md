@@ -29,7 +29,7 @@ A premium, multimodal math tutoring system designed to solve complex JEE-level m
 ## 🛠️ Tech Stack
 
 - **Frontend**: Streamlit (Premium UI)
-- **OCR**: Gemini 3.1 Vision
+- **OCR**: Gemini 3.1 Flash
 - **ASR**: Faster-Whisper
 - **LLM**: Google Gemini API (3.1 Flash / 3.1 Flash Lite)
 - **Vector DB**: ChromaDB with FastEmbed
